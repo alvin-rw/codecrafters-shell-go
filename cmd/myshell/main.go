@@ -2,8 +2,11 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
+	"log"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -80,5 +83,28 @@ func typeCommand(input string) {
 			return
 		}
 	}
+
+	paths := readPathEnv()
+	for _, path := range paths {
+		fp := filepath.Join(path, input)
+		_, err := os.Stat(fp)
+		if err != nil {
+			if !errors.Is(err, os.ErrNotExist) {
+				log.Fatalf("error when checking the file from path, %v", err)
+			}
+		} else {
+			fmt.Printf("%s is %s\n", input, fp)
+			return
+		}
+	}
+
 	fmt.Printf("%s: not found\n", input)
+}
+
+func readPathEnv() []string {
+	pathValue := os.Getenv("PATH")
+
+	paths := strings.Split(pathValue, ":")
+
+	return paths
 }
