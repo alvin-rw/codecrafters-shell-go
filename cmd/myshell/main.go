@@ -21,9 +21,11 @@ func main() {
 
 		switch cmd {
 		case "exit":
-			exit(args[0])
+			exitCommand(args[0])
 		case "echo":
-			echo(args)
+			echoCommand(args)
+		case "type":
+			typeCommand(args[0])
 		default:
 			fmt.Printf("%s: command not found\n", cmd)
 		}
@@ -49,7 +51,7 @@ func readInput(rd *bufio.Reader) (string, []string, error) {
 	return command, args, nil
 }
 
-func exit(input string) error {
+func exitCommand(input string) error {
 	statusCode, err := strconv.Atoi(input)
 	if err != nil {
 		return err
@@ -59,8 +61,24 @@ func exit(input string) error {
 	return nil
 }
 
-func echo(input []string) {
+func echoCommand(input []string) {
 	out := strings.Join(input, " ")
 
 	fmt.Printf("%s\n", out)
+}
+
+func typeCommand(input string) {
+	builtinCommands := []string{
+		"echo",
+		"type",
+		"exit",
+	}
+
+	for _, cmd := range builtinCommands {
+		if input == cmd {
+			fmt.Printf("%s is a shell builtin\n", input)
+			return
+		}
+	}
+	fmt.Printf("%s: not found\n", input)
 }
