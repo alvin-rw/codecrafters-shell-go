@@ -22,6 +22,8 @@ func main() {
 		switch cmd {
 		case "exit":
 			exit(args[0])
+		case "echo":
+			echo(args)
 		default:
 			fmt.Printf("%s: command not found\n", cmd)
 		}
@@ -55,4 +57,10 @@ func exit(input string) error {
 
 	os.Exit(statusCode)
 	return nil
+}
+
+func echo(input []string) {
+	out := strings.Join(input, " ")
+
+	fmt.Printf("%s\n", out)
 }
