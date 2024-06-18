@@ -80,5 +80,25 @@ func typeCommand(input string) {
 			return
 		}
 	}
+
+	pathCommands := readPathEnv()
+	for _, dir := range pathCommands {
+		s := strings.Split(dir, "/")
+		command := s[len(s)-1]
+
+		if input == command {
+			fmt.Printf("%s is %s\n", command, dir)
+			return
+		}
+	}
+
 	fmt.Printf("%s: not found\n", input)
+}
+
+func readPathEnv() []string {
+	pathValue := os.Getenv("PATH")
+
+	availableCommands := strings.Split(pathValue, ":")
+
+	return availableCommands
 }
