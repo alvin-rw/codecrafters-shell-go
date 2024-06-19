@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -30,7 +31,7 @@ func main() {
 		case "type":
 			typeCommand(args[0])
 		default:
-			fmt.Printf("%s: command not found\n", cmd)
+			runProgram(cmd, args)
 		}
 	}
 }
@@ -84,7 +85,19 @@ func typeCommand(input string) {
 		}
 	}
 
-	paths := readPathEnv()
+	if commandExistsInpath, fp := isInPath(input); commandExistsInpath {
+		fmt.Printf("%s is %s\n", input, fp)
+		return
+	}
+
+	fmt.Printf("%s: not found\n", input)
+}
+
+func isInPath(input string) (bool, string) {
+	pathValue := os.Getenv("PATH")
+
+	paths := strings.Split(pathValue, ":")
+
 	for _, path := range paths {
 		fp := filepath.Join(path, input)
 		_, err := os.Stat(fp)
@@ -93,18 +106,26 @@ func typeCommand(input string) {
 				log.Fatalf("error when checking the file from path, %v", err)
 			}
 		} else {
-			fmt.Printf("%s is %s\n", input, fp)
-			return
+			return true, fp
 		}
 	}
 
-	fmt.Printf("%s: not found\n", input)
+	return false, ""
 }
 
-func readPathEnv() []string {
-	pathValue := os.Getenv("PATH")
+func runProgram(cmd string, args []string) {
+	commandExistsInPath, _ := isInPath(cmd)
 
-	paths := strings.Split(pathValue, ":")
-
-	return paths
+	if commandExistsInPath {
+		out, err := exec.Command(cmd, args...).Output()
+		if err != nil {
+			fmt.Println(err)
+			return
+		} else if out != nil {
+			fmt.Printf("%s", string(out))
+			return
+		}
+	} else {
+		fmt.Printf("%s: command not found\n", cmd)
+	}
 }
